@@ -7,5 +7,7 @@ Dir.chdir(DIRECTORY)
 Dir.glob("**/*.mkv") do |file|
   path = File.absolute_path(file)
   basename = File.basename(file, ".*") 
-  system("ffmpeg", "-i", path, "#{basename}.srt")
+  directory = File.dirname(file)
+  srtPath = File.join(directory, basename)
+  system("ffmpeg", "-i", path, "#{srtPath}.srt")
 end
