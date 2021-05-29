@@ -70,12 +70,12 @@ def generateGifs(video_file_path, sub_file_path):
   subs = pysrt.open(sub_file_path, encoding="utf-8")
 
   # generate a gif for every line of dialogue
-  for sub in subs:
+  for i, sub in enumerate(subs):
     # 00:00:00,000 => 00:00:00.000
     start = str(sub.start).replace(',', '.')
     end = str(sub.end - sub.start).replace(',', '.')
 
-    gif_filename = os.path.join(outpath, slugify(striptags(sub.text)) + ".gif")
+    gif_filename = os.path.join(outpath, f'{i:06}-{slugify(striptags(sub.text))}.gif')
     
     if os.path.isfile(gif_filename):
       next
