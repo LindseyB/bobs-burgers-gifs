@@ -48,23 +48,15 @@ def makeGif(video, start, end, string, output):
     except NameError:
       image_size = image.size
 
-    # multiple lines in text
-    if len(text) == 2:
-      # at most 2?
-      text_size = font.getsize(text[0])
+    subs_num = len(text)
+    text_size = font.getsize(text[0])
+    text_height = text_size[1]
+    for i in range(subs_num):
+      text_size = font.getsize(text[i])
       x = (image_size[0]/2) - (text_size[0]/2)
-      y = image_size[1] - (2*text_size[1]) - 5 # padding
-      drawText(draw, x, y, text[0], font)
-
-      text_size = font.getsize(text[1])
-      x = (image_size[0]/2) - (text_size[0]/2)
-      y += text_size[1]
-      drawText(draw, x, y, text[1], font)
-    else:
-      text_size = font.getsize(text[0])
-      x = (image_size[0]/2) - (text_size[0]/2)
-      y = image_size[1] - text_size[1] - 5 # padding
-      drawText(draw, x, y, text[0], font)
+      mult = subs_num - i
+      y = image_size[1] - (mult*text_height) - 5 # padding
+      drawText(draw, x, y, text[i], font)
 
     image.save(os.path.join(directory,f))
 
