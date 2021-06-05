@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, re, subprocess, shutil, pysrt
+import os, re, subprocess, shutil, pysrt, csv
 from PIL import Image, ImageFont, ImageDraw
 from slugify import slugify
 
@@ -64,24 +64,35 @@ def makeGif(video, start, end, string, output):
   shutil.rmtree(directory)
   
 
-def generateGifs(video_file_path, sub_file_path):
+def generateGifs(video_file_path, sub_file_path, create_csv=False):
   outpath = "gifs"
 
   subs = pysrt.open(sub_file_path, encoding="utf-8")
+  regex = r"(?P<episode>(s|S)\d+(e|E)\d+)"
+  m = re.search(regex, video_file_path)
+  episode_string = m.group('episode')
 
-  # generate a gif for every line of dialogue
-  for i, sub in enumerate(subs):
-    # 00:00:00,000 => 00:00:00.000
-    start = str(sub.start).replace(',', '.')
-    end = str(sub.end - sub.start).replace(',', '.')
+  with open(f'{episode_string}.csv', 'w', newline='') as csvfile:
+    if create_csv:
+      fieldnames = ['subtitle', 'file_name']
+      writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+      writer.writeheader()
 
-    gif_filename = os.path.join(outpath, f'{i:06}-{slugify(striptags(sub.text))}.gif')
-    
-    if os.path.isfile(gif_filename):
-      next
-    else:
-      print("generating " + gif_filename + "...")
-      makeGif(video_file_path, start, end, sub.text, gif_filename)
+    # generate a gif for every line of dialogue
+    for i, sub in enumerate(subs):
+      # 00:00:00,000 => 00:00:00.000
+      start = str(sub.start).replace(',', '.')
+      end = str(sub.end - sub.start).replace(',', '.')
+
+      gif_filename = os.path.join(outpath, f'{i:06}-{slugify(striptags(sub.text))}.gif')
+      
+      if os.path.isfile(gif_filename):
+        next
+      else:
+        print("generating " + gif_filename + "...")
+        makeGif(video_file_path, start, end, sub.text, gif_filename)
+        if create_csv:
+          writer.writerow({'subtitle': striptags(sub.text), 'file_name': gif_filename})
 
 if __name__ == '__main__':
-  generateGifs("/Users/lindseybieda/Dropbox/BobsBurgers/Season 01/Bob's Burgers S01E01 Human Flesh.mkv", "/Users/lindseybieda/Dropbox/BobsBurgers/Season 01/Bob's Burgers S01E01 Human Flesh.srt")
+  generateGifs("/Users/lindseybieda/Dropbox/BobsBurgers/Season 01/Bob's Burgers S01E01 Human Flesh.mkv", "/Users/lindseybieda/Dropbox/BobsBurgers/Season 01/Bob's Burgers S01E01 Human Flesh.srt", create_csv=True)
